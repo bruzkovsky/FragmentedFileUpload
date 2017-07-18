@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using FragmentedFileUpload;
 using FragmentedFileUpload.Client;
 
 // sample image file: http://hubblesite.org/newscenter/archive/releases/2004/15/image/b/
@@ -23,23 +22,17 @@ namespace WinFormsFileUpload
             if (rslt != DialogResult.OK)
                 return;
 
-            var tempFolderPath = Path.Combine(CurrentFolder, "Temp");
-            var splitter = FileSplitter.Create(openFileDialog1.FileName);
-            splitter.TempFolderPath = tempFolderPath;
-            splitter.MaxChunkSizeMegaByte = 0.1;
-            splitter.SplitFile();
-            foreach (var file in splitter.FileParts)
-            {
-                if (!await UploadFile(file))
-                    break;
-            }
-            MessageBox.Show("Upload complete!");
+            if (await UploadFile(openFileDialog1.FileName))
+                MessageBox.Show("Upload complete.");
+            else
+                MessageBox.Show("Error while uploading.");
         }
 
         public async Task<bool> UploadFile(string fileName)
         {
+            var tempFolderPath = Path.Combine(CurrentFolder, "Temp");
             const string requestUri = "http://localhost:8170/Home/UploadFile/";
-            var uploadClient = UploadClient.Create(fileName, requestUri);
+            var uploadClient = UploadClient.Create(fileName, requestUri, tempFolderPath);
             return await uploadClient.UploadFile();
         }
         

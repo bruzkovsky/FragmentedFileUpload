@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace FragmentedFileUpload
@@ -18,6 +17,7 @@ namespace FragmentedFileUpload
         string GetDirectoryName(string directoryPath);
         IEnumerable<string> GetFilesInDirectory(string directoryPath, string searchpattern);
         Stream OpenRead(string filePath);
+        void CopyFileToStream(string file, Stream stream);
     }
 
     public class FileSystemService : IFileSystemService
@@ -84,6 +84,14 @@ namespace FragmentedFileUpload
         public void DeleteFile(string filePath)
         {
             File.Delete(filePath);
+        }
+
+        public void CopyFileToStream(string file, Stream stream)
+        {
+            using (var fileChunk = File.OpenRead(file))
+            {
+                fileChunk.CopyTo(stream);
+            }
         }
     }
 }

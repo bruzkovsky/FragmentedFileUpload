@@ -7,3 +7,4 @@ bin
 obj
 packages
 /MVCServer/MVCApp/MVCApp/App_Data
+/WinFileUpload/MVCApp/App_Data

@@ -6,6 +6,8 @@ namespace FragmentedFileUpload
 {
     public sealed class FileSplitter
     {
+        private const int Mega = 1024 * 1024;
+
         public string FilePath { get; private set; }
         public string TempFolderPath { get; set; }
         public double MaxChunkSizeMegaByte { get; set; }
@@ -13,11 +15,12 @@ namespace FragmentedFileUpload
 
         public IFileSystemService FileSystem { private get; set; }
 
-        public static FileSplitter Create(string fileName, IFileSystemService fileSystemService = null)
+        public static FileSplitter Create(string fileName, string tempFolderPath, IFileSystemService fileSystemService = null)
         {
             return new FileSplitter(fileSystemService ?? new FileSystemService())
             {
-                FilePath = fileName
+                FilePath = fileName,
+                TempFolderPath = tempFolderPath
             };
         }
 
@@ -46,8 +49,8 @@ namespace FragmentedFileUpload
 
             var baseFileName = FileSystem.GetFileName(FilePath);
             var bufferChunkSize = MaxChunkSizeMegaByte > 0
-                ? (int) Math.Ceiling(MaxChunkSizeMegaByte * (1024 * 1024))
-                : 1;
+                ? (int) Math.Ceiling(MaxChunkSizeMegaByte * Mega)
+                : 1 * Mega;
             const int readbufferSize = 1024;
             var fsBuffer = new byte[readbufferSize];
             // adapted from: http://stackoverflow.com/questions/3967541/how-to-split-large-files-efficiently

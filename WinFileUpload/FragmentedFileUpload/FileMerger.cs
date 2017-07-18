@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FragmentedFileUpload.Constants;
 
@@ -7,80 +7,67 @@ namespace FragmentedFileUpload
 {
     public class FileMerger
     {
-        public string InputPath { get; set; }
-        public string FileName { get; set; }
-        public string OutputFilePath { get; set; }
+        public string InputFilePath { get; set; }
+        public string OutputDirectoryPath { get; set; }
 
         public IFileSystemService FileSystem { private get; set; }
 
-        public void ExtractFilesFromRequest()
+        public string MergeFile()
         {
-            var searchpattern = $"{FileName}{Naming.PartToken}*";
-            foreach (var file in FileSystem.GetFilesInDirectory(InputPath, searchpattern))
-            {
-                MergeFile(file);
-            }
-        }
+            if (string.IsNullOrWhiteSpace(InputFilePath))
+                throw new InvalidOperationException("Input path cannot be null or empty.");
+            if (string.IsNullOrWhiteSpace(OutputDirectoryPath))
+                throw new InvalidOperationException("Output path cannot be null or empty.");
 
-        /// <summary>
-        /// original name + ".part_N.X" (N = file part number, X = total files)
-        /// Objective = enumerate files in folder, look for all matching parts of split file. If found, merge and return true.
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        public bool MergeFile(string fileName)
-        {
-            var rslt = false;
-            // parse out the different tokens from the filename according to the convention
-            var baseFileName = fileName.Substring(0, fileName.IndexOf(Naming.PartToken, StringComparison.Ordinal));
-            var trailingTokens = fileName.Substring(fileName.IndexOf(Naming.PartToken, StringComparison.Ordinal) + Naming.PartToken.Length);
-            int.TryParse(trailingTokens.Substring(0, trailingTokens.IndexOf(".", StringComparison.Ordinal)), out int fileIndex);
-            int.TryParse(trailingTokens.Substring(trailingTokens.IndexOf(".", StringComparison.Ordinal) + 1), out int fileCount);
-            // get a list of all file parts in the temp folder
-            var searchpattern = FileSystem.GetFileName(baseFileName) + Naming.PartToken + "*";
-            var filesList = FileSystem.GetFilesInDirectory(FileSystem.GetDirectoryName(fileName), searchpattern).OrderBy(s => s).ToArray();
-            //  merge .. improvement would be to confirm individual parts are there / correctly in sequence, a security check would also be important
-            // only proceed if we have received all the file chunks
-            if (filesList.Length == fileCount)
+            var inputDirectory = FileSystem.GetDirectoryName(InputFilePath);
+            if (!FileSystem.DirectoryExists(inputDirectory))
+                throw new DirectoryNotFoundException("Input path does not exist.");
+
+            var fileName = FileSystem.GetFileName(InputFilePath);
+            var baseFileName = fileName.Remove(fileName.IndexOf(Naming.PartToken, StringComparison.Ordinal));
+            var searchpattern = $"{baseFileName}{Naming.PartToken}*";
+            var orderedFiles = FileSystem.GetFilesInDirectory(inputDirectory, searchpattern)
+                .OrderBy(s => s).ToArray();
+
+            // naive check if all parts are there
+            var partName = orderedFiles.First();
+            int.TryParse(partName.Substring(partName.LastIndexOf('.') + 1), out int fileCount);
+            if (orderedFiles.Length != fileCount)
+                throw new InvalidOperationException("Parts are not valid. Did all parts get copied to the InputPath?");
+
+            // ensure output directory exists and there is no file with the same name
+            var outputFilePath = FileSystem.PathCombine(OutputDirectoryPath, baseFileName);
+            if (FileSystem.FileExists(outputFilePath))
+                FileSystem.DeleteFile(outputFilePath);
+            if (!FileSystem.DirectoryExists(OutputDirectoryPath))
+                FileSystem.CreateDirectory(OutputDirectoryPath);
+
+            using (var stream = FileSystem.CreateFile(outputFilePath))
             {
-                // use a singleton to stop overlapping processes
-                if (!MergeFileManager.Instance.InUse(baseFileName))
+                foreach (var file in orderedFiles)
                 {
-                    MergeFileManager.Instance.AddFile(baseFileName);
-                    if (FileSystem.FileExists(baseFileName))
-                        FileSystem.DeleteFile(baseFileName);
-                    // add each file located to a list so we can get them into 
-                    // the correct order for rebuilding the file
-                    var mergeList = new List<SortedFile>();
-                    foreach (var file in filesList)
-                    {
-                        var sFile = new SortedFile();
-                        sFile.FileName = file;
-                        baseFileName = file.Substring(0, file.IndexOf(Naming.PartToken, StringComparison.Ordinal));
-                        trailingTokens = file.Substring(file.IndexOf(Naming.PartToken, StringComparison.Ordinal) + Naming.PartToken.Length);
-                        int.TryParse(trailingTokens.Substring(0, trailingTokens.IndexOf(".", StringComparison.Ordinal)), out fileIndex);
-                        sFile.FileOrder = fileIndex;
-                        mergeList.Add(sFile);
-                    }
-                    // sort by the file-part number to ensure we merge back in the correct order
-                    var mergeOrder = mergeList.OrderBy(s => s.FileOrder).ToList();
-                    using (var stream = FileSystem.CreateFile(baseFileName))
-                    {
-                        // merge each file chunk back into one contiguous file stream
-                        foreach (var chunk in mergeOrder)
-                        {
-                            using (var fileChunk = FileSystem.OpenRead(chunk.FileName))
-                            {
-                                fileChunk.CopyTo(stream);
-                            }
-                        }
-                    }
-                    rslt = true;
-                    // unlock the file from singleton
-                    MergeFileManager.Instance.RemoveFile(baseFileName);
+                    if (!FileSystem.FileExists(file))
+                        throw new FileNotFoundException("Part not found.", file);
+
+                    FileSystem.CopyFileToStream(file, stream);
                 }
             }
-            return rslt;
+
+            return outputFilePath;
+        }
+
+        private FileMerger(IFileSystemService fileSystemService)
+        {
+            FileSystem = fileSystemService;
+        }
+
+        public static FileMerger Create(string inputFilePath, string outputFilePath, IFileSystemService fileSystemService = null)
+        {
+            return new FileMerger(fileSystemService ?? new FileSystemService())
+            {
+                InputFilePath = inputFilePath,
+                OutputDirectoryPath = outputFilePath
+            };
         }
     }
 }
