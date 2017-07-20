@@ -10,3 +10,5 @@ packages
 /WinFileUpload/MVCApp/App_Data
 /src/MVCApp/App_Data
 *.user
+/src/tools
+/tools
