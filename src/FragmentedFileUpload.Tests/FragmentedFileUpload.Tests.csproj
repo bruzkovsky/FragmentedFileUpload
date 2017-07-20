@@ -4,17 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8EDF4429-251A-416D-BB68-93F227191BCF}</ProjectGuid>
+    <ProjectGuid>{FEE5DA28-5D7D-4FD7-B8EC-00502CD03C2A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FragmentedFileUpload.Client.Tests</RootNamespace>
-    <AssemblyName>FragmentedFileUpload.Client.Tests</AssemblyName>
+    <RootNamespace>FragmentedFileUpload.Tests</RootNamespace>
+    <AssemblyName>FragmentedFileUpload.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup>
-    <CopyNuGetImplementations>true</CopyNuGetImplementations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,18 +32,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Web">
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileMergerTests.cs" />
+    <Compile Include="FileSplitterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UploadClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client">
-      <Version>5.2.3</Version>
-    </PackageReference>
     <PackageReference Include="Moq">
       <Version>4.7.99</Version>
     </PackageReference>
@@ -58,20 +50,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FragmentedFileUpload.Client\FragmentedFileUpload.Client.csproj">
-      <Project>{afb019a6-35ab-40c2-818a-ddf1ca731b36}</Project>
-      <Name>FragmentedFileUpload.Client</Name>
-    </ProjectReference>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\FragmentedFileUpload\FragmentedFileUpload.csproj">
       <Project>{38c67d57-185d-488a-8b47-3a2027fb3084}</Project>
       <Name>FragmentedFileUpload</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <Content Include="TestData\PictureQualitySmall1_2017.05.23_08-24-50.iclr">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

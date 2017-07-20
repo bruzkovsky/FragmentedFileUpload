@@ -4,17 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8EDF4429-251A-416D-BB68-93F227191BCF}</ProjectGuid>
+    <ProjectGuid>{19E74F44-4398-466A-B60A-1D2D67198D35}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FragmentedFileUpload.Client.Tests</RootNamespace>
-    <AssemblyName>FragmentedFileUpload.Client.Tests</AssemblyName>
+    <RootNamespace>FragmentedFileUpload.IntegrationTests</RootNamespace>
+    <AssemblyName>FragmentedFileUpload.IntegrationTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup>
-    <CopyNuGetImplementations>true</CopyNuGetImplementations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,13 +32,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Web">
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FragmentedFileUploadIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UploadClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client">
@@ -61,6 +55,10 @@
     <ProjectReference Include="..\FragmentedFileUpload.Client\FragmentedFileUpload.Client.csproj">
       <Project>{afb019a6-35ab-40c2-818a-ddf1ca731b36}</Project>
       <Name>FragmentedFileUpload.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FragmentedFileUpload.Server\FragmentedFileUpload.Server.csproj">
+      <Project>{5002cfa8-a6ec-492a-b6ea-7da95eceb466}</Project>
+      <Name>FragmentedFileUpload.Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\FragmentedFileUpload\FragmentedFileUpload.csproj">
       <Project>{38c67d57-185d-488a-8b47-3a2027fb3084}</Project>

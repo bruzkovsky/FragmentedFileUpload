@@ -3,7 +3,7 @@ using System.IO;
 using Moq;
 using NUnit.Framework;
 
-namespace FragmentedFileUpload.Client.Tests
+namespace FragmentedFileUpload.Tests
 {
     [TestFixture]
     public class FileMergerTests

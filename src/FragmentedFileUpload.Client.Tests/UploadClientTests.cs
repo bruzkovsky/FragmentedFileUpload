@@ -24,6 +24,7 @@ namespace FragmentedFileUpload.Client.Tests
             new List<MultipartMemoryStreamProvider>();
         private static AuthenticationHeaderValue AuthorizationHeader { get; set; }
         private static string RequestUrl { get; set; }
+        private static Func<HttpRequestMessage, HttpResponseMessage> ResponseMessageFactory { get; set; }
 
         private string BinFolder => AppDomain.CurrentDomain.BaseDirectory;
 
@@ -34,10 +35,11 @@ namespace FragmentedFileUpload.Client.Tests
             string tempPath,
             Func<HttpClient, HttpClient> authorizeClient = null,
             Func<HttpClient> httpClientFactory = null,
-            IFileSystemService fileSystemService = null)
+            IFileSystemService fileSystemService = null,
+            Action<HttpStatusCode> onRequestFailed = null)
         {
             return UploadClient.Create(filePath, url, tempPath, authorizeClient,
-                httpClientFactory ?? (() => new HttpClient(new WebApiKeyHandler())), fileSystemService);
+                httpClientFactory ?? (() => new HttpClient(new WebApiKeyHandler())), onRequestFailed, fileSystemService);
         }
 
         [SetUp]
@@ -231,6 +233,70 @@ namespace FragmentedFileUpload.Client.Tests
             Assert.AreEqual(token, $"{AuthorizationHeader.Scheme} {AuthorizationHeader.Parameter}");
         }
 
+        [Test]
+        public void UploadFile_WhenResponseStatusIsUnauthorized_InvokeRequestFailedCallback()
+        {
+            // Arrange
+            const string url = "https://this.is.a.valid/url";
+            var statusCode = HttpStatusCode.OK;
+            var client = CreateUploadClient("path", url, "temp", fileSystemService: _fileSystemMock.Object, onRequestFailed: c => statusCode = c);
+            ResponseMessageFactory = _ => new HttpResponseMessage(HttpStatusCode.Unauthorized);
+
+            // Act
+            client.UploadFile().Wait();
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Unauthorized, statusCode);
+        }
+
+        [Test]
+        public void UploadFile_WhenResponseStatusIsBadRequest_InvokeRequestFailedCallback()
+        {
+            // Arrange
+            const string url = "https://this.is.a.valid/url";
+            var statusCode = HttpStatusCode.OK;
+            var client = CreateUploadClient("path", url, "temp", fileSystemService: _fileSystemMock.Object, onRequestFailed: c => statusCode = c);
+            ResponseMessageFactory = _ => new HttpResponseMessage(HttpStatusCode.BadRequest);
+
+            // Act
+            client.UploadFile().Wait();
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, statusCode);
+        }
+
+        [Test]
+        public void UploadFile_WhenResponseStatusIsInternalServerError_InvokeRequestFailedCallback()
+        {
+            // Arrange
+            const string url = "https://this.is.a.valid/url";
+            var statusCode = HttpStatusCode.OK;
+            var client = CreateUploadClient("path", url, "temp", fileSystemService: _fileSystemMock.Object, onRequestFailed: c => statusCode = c);
+            ResponseMessageFactory = _ => new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            // Act
+            client.UploadFile().Wait();
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.InternalServerError, statusCode);
+        }
+
+        [Test]
+        public void UploadFile_WhenResponseStatusIsNotFound_InvokeRequestFailedCallback()
+        {
+            // Arrange
+            const string url = "https://this.is.a.valid/url";
+            var statusCode = HttpStatusCode.OK;
+            var client = CreateUploadClient("path", url, "temp", fileSystemService: _fileSystemMock.Object, onRequestFailed: c => statusCode = c);
+            ResponseMessageFactory = _ => new HttpResponseMessage(HttpStatusCode.NotFound);
+
+            // Act
+            client.UploadFile().Wait();
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.NotFound, statusCode);
+        }
+
         private class WebApiKeyHandler : HttpMessageHandler
         {
             protected override async Task<HttpResponseMessage> SendAsync(
@@ -241,7 +307,7 @@ namespace FragmentedFileUpload.Client.Tests
                 AuthorizationHeader = request.Headers.Authorization;
                 RequestContents.Add(await request.Content.ReadAsMultipartAsync(cancellationToken));
 
-                return request.CreateResponse(HttpStatusCode.OK);
+                return ResponseMessageFactory?.Invoke(request) ?? request.CreateResponse(HttpStatusCode.OK);
             }
         }
     }

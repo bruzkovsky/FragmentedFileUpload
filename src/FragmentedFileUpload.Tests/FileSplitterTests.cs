@@ -6,7 +6,7 @@ using FragmentedFileUpload.Constants;
 using Moq;
 using NUnit.Framework;
 
-namespace FragmentedFileUpload.Client.Tests
+namespace FragmentedFileUpload.Tests
 {
     [TestFixture]
     public class FileSplitterTests

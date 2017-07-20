@@ -29,6 +29,19 @@ namespace FragmentedFileUpload.Server
 
         public void Receive(Stream fileStream, string fileName, string originalPartHash)
         {
+            if (fileStream == null)
+                throw new ArgumentException("File stream cannot be null.", nameof(fileStream));
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException("File name cannot be null or whitespace.", nameof(fileName));
+            if (string.IsNullOrWhiteSpace(originalPartHash))
+                throw new ArgumentException("Original hash cannot be null or whitespace.", nameof(originalPartHash));
+
+            if (string.IsNullOrWhiteSpace(TempPath))
+                throw new InvalidOperationException("Temporary path cannot be null or whitespace.");
+            if (string.IsNullOrWhiteSpace(OutputPath))
+                throw new InvalidOperationException("Output path cannot be null or whitespace.");
+            if (string.IsNullOrWhiteSpace(Hash))
+                throw new InvalidOperationException("Hash cannot be null or whitespace.");
             if (!FileSystem.DirectoryExists(TempPath))
                 FileSystem.CreateDirectory(TempPath);
             var partFilePath = FileSystem.PathCombine(TempPath, fileName);

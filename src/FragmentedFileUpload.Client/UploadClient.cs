@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -27,6 +28,7 @@ namespace FragmentedFileUpload.Client
 
         public Func<HttpClient, HttpClient> AuthorizeClient { private get; set; }
         public Func<HttpClient> ClientFactory { private get; set; }
+        public Action<HttpStatusCode> OnRequestFailed { private get; set; }
         public IFileSystemService FileSystem { private get; set; }
 
         public static UploadClient Create(
@@ -35,6 +37,7 @@ namespace FragmentedFileUpload.Client
             string tempFolderPath,
             Func<HttpClient, HttpClient> authorizeClient = null,
             Func<HttpClient> httpClient = null,
+            Action<HttpStatusCode> onRequestFailed = null,
             IFileSystemService fileSystemService = null)
         {
             return new UploadClient(httpClient ?? (() => new HttpClient()),
@@ -43,7 +46,8 @@ namespace FragmentedFileUpload.Client
                 FilePath = filePath,
                 UploadUrl = uploadUrl,
                 TempFolderPath = tempFolderPath,
-                AuthorizeClient = authorizeClient
+                AuthorizeClient = authorizeClient,
+                OnRequestFailed = onRequestFailed
             };
         }
 
@@ -107,7 +111,11 @@ namespace FragmentedFileUpload.Client
                     content.Add(partHashContent, "partHash");
 
                     var result = await client.PostAsync(UploadUrl, content);
-                    result.EnsureSuccessStatusCode();
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        OnRequestFailed?.Invoke(result.StatusCode);
+                        return;
+                    }
 
                     FileSystem.DeleteFile(partFilePath);
                 }
