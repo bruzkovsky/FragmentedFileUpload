@@ -26,7 +26,7 @@ namespace FragmentedFileUpload
             var fileName = FileSystem.GetFileName(InputFilePath);
             var baseFileName = fileName.Remove(fileName.IndexOf(Naming.PartToken, StringComparison.Ordinal));
             var searchpattern = $"{baseFileName}{Naming.PartToken}*";
-            var orderedFiles = FileSystem.GetFilesInDirectory(inputDirectory, searchpattern)
+            var orderedFiles = FileSystem.EnumerateFilesInDirectory(inputDirectory, searchpattern)
                 .OrderBy(s => s).ToArray();
 
             // naive check if all parts are there

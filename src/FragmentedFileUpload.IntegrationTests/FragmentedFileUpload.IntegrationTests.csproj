@@ -70,7 +70,17 @@
     <Content Include="TestData\PictureQualitySmall1_2017.05.23_08-24-50.iclr">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestData\ResumeTest\Client\Temp\780faf7b15f08c3cce0fe02c26d932bbd36ffd393eee4e5e6c8e0e383a787fab\PictureQualitySmall1_2017.05.23_08-24-50.iclr.part_2.3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\ResumeTest\Client\Temp\780faf7b15f08c3cce0fe02c26d932bbd36ffd393eee4e5e6c8e0e383a787fab\PictureQualitySmall1_2017.05.23_08-24-50.iclr.part_3.3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\ResumeTest\Server\Temp\780faf7b15f08c3cce0fe02c26d932bbd36ffd393eee4e5e6c8e0e383a787fab\PictureQualitySmall1_2017.05.23_08-24-50.iclr.part_1.3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -16,7 +16,7 @@ namespace FragmentedFileUpload.Tests
             _fileSystemMock = new Mock<IFileSystemService>();
             _fileSystemMock.Setup(f => f.CreateFile(It.IsAny<string>()))
                 .Returns(() => new MemoryStream());
-            _fileSystemMock.Setup(f => f.GetFilesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
+            _fileSystemMock.Setup(f => f.EnumerateFilesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(new[]
                 {
                     "any.part_01.11", "any.part_02.11", "any.part_03.11", "any.part_04.11", "any.part_05.11", "any.part_06.11",

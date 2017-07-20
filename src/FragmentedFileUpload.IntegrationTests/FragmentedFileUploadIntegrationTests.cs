@@ -15,8 +15,10 @@ namespace FragmentedFileUpload.IntegrationTests
     [TestFixture]
     public class FragmentedFileUploadIntegrationTests
     {
-        private static readonly string UploadPath = Path.Combine(BinFolder, "Server", "Temp");
-        private static readonly string OutputPath = Path.Combine(BinFolder, "Server", "Import");
+        private static string UploadPath { get; } = Path.Combine(BinFolder, "Server", "Temp");
+        private static string OutputPath { get; } = Path.Combine(BinFolder, "Server", "Import");
+        private static string TempPath { get; } = Path.Combine(BinFolder, "Client", "Temp");
+        private static string TestDataPath { get; } = Path.Combine(BinFolder, "TestData");
 
         private static string BinFolder => AppDomain.CurrentDomain.BaseDirectory;
 
@@ -33,6 +35,17 @@ namespace FragmentedFileUpload.IntegrationTests
                 httpClientFactory ?? (() => new HttpClient(new WebApiKeyHandler())), onRequestFailed, fileSystemService);
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            if (Directory.Exists(TempPath))
+                Directory.Delete(TempPath, true);
+            if (Directory.Exists(OutputPath))
+                Directory.Delete(OutputPath, true);
+            if (Directory.Exists(UploadPath))
+                Directory.Delete(UploadPath, true);
+        }
+
         [Test]
         public void UploadFile_FileIsUploadedInPartsAndSavedOnServer()
         {
@@ -42,7 +55,7 @@ namespace FragmentedFileUpload.IntegrationTests
             const string uploadUrl = "http://this.is.a/valid/url/";
             var client =
                 CreateUploadClient(Path.Combine(BinFolder, "TestData", fileName),
-                    uploadUrl, Path.Combine(BinFolder, "Client", "Temp"));
+                    uploadUrl, TempPath);
             client.MaxChunkSizeMegaByte = 0.1;
 
             // Act
@@ -54,6 +67,44 @@ namespace FragmentedFileUpload.IntegrationTests
             Assert.IsTrue(File.Exists(filePath));
             using (var stream = File.OpenRead(filePath))
                 Assert.AreEqual(originalHash, stream.ComputeSha256Hash());
+            Assert.IsFalse(Directory.Exists(Path.Combine(TempPath, originalHash)));
+        }
+
+        [Test]
+        public void ResumeUpload_FileIsUploadedInPartsAndSavedOnServer()
+        {
+            // Arrange
+            const string fileName = "PictureQualitySmall1_2017.05.23_08-24-50.iclr";
+            const string originalHash = "780faf7b15f08c3cce0fe02c26d932bbd36ffd393eee4e5e6c8e0e383a787fab";
+            const string uploadUrl = "http://this.is.a/valid/url/";
+            var resumeTestPath = Path.Combine(TestDataPath, "ResumeTest");
+            foreach (var directory in Directory.GetDirectories(resumeTestPath, "*", SearchOption.AllDirectories))
+            {
+                if (directory != null)
+                {
+                    var tempDirectoryPath = directory.Replace(resumeTestPath, BinFolder);
+                    Directory.CreateDirectory(tempDirectoryPath);
+                    foreach (var file in Directory.GetFiles(directory))
+                    {
+                        if (file != null)
+                            File.Copy(file, Path.Combine(tempDirectoryPath, Path.GetFileName(file)));
+                    }
+                }
+            }
+            var client =
+                CreateUploadClient(Path.Combine(TestDataPath, fileName),
+                    uploadUrl, TempPath);
+            client.MaxChunkSizeMegaByte = 0.1;
+
+            // Act
+            client.ResumeUpload().Wait();
+
+            // Assert
+            var filePath = Path.Combine(OutputPath, fileName);
+            Assert.IsTrue(File.Exists(filePath));
+            using (var stream = File.OpenRead(filePath))
+                Assert.AreEqual(originalHash, stream.ComputeSha256Hash());
+            Assert.IsFalse(Directory.Exists(Path.Combine(TempPath, originalHash)));
         }
 
         private class WebApiKeyHandler : HttpMessageHandler

@@ -44,8 +44,9 @@ namespace FragmentedFileUpload
             if (!FileSystem.FileExists(FilePath))
                 throw new InvalidOperationException("The file does not exist.");
 
-            if (!FileSystem.DirectoryExists(TempFolderPath))
-                FileSystem.CreateDirectory(TempFolderPath);
+            if (FileSystem.DirectoryExists(TempFolderPath))
+                FileSystem.DeleteDirectory(TempFolderPath, true);
+            FileSystem.CreateDirectory(TempFolderPath);
 
             var baseFileName = FileSystem.GetFileName(FilePath);
             var bufferChunkSize = MaxChunkSizeMegaByte > 0

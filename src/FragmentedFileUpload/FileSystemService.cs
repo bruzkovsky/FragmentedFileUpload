@@ -15,11 +15,12 @@ namespace FragmentedFileUpload
         void DeleteFile(string filePath);
         Stream CreateFile(string filePath);
         string GetDirectoryName(string directoryPath);
-        IEnumerable<string> GetFilesInDirectory(string directoryPath, string searchpattern);
+        IEnumerable<string> EnumerateFilesInDirectory(string directoryPath, string searchpattern);
         Stream OpenRead(string filePath);
         void CopyFileToStream(string file, Stream stream);
         void DeleteDirectory(string directoryPath, bool recursive);
-        IEnumerable<string> GetDirectoriesInDirectory(string directoryPath, string searchpattern);
+        IEnumerable<string> EnumerateDirectoriesInDirectory(string directoryPath, string searchpattern);
+        IEnumerable<string> EnumerateEntriesInDirectory(string directoryPath, string searchpattern);
     }
 
     public class FileSystemService : IFileSystemService
@@ -39,14 +40,19 @@ namespace FragmentedFileUpload
             return Path.GetDirectoryName(directoryPath);
         }
 
-        public IEnumerable<string> GetFilesInDirectory(string directoryPath, string searchpattern)
+        public IEnumerable<string> EnumerateFilesInDirectory(string directoryPath, string searchpattern)
         {
-            return Directory.GetFiles(directoryPath, searchpattern);
+            return Directory.EnumerateFiles(directoryPath, searchpattern);
         }
 
-        public IEnumerable<string> GetDirectoriesInDirectory(string directoryPath, string searchpattern)
+        public IEnumerable<string> EnumerateDirectoriesInDirectory(string directoryPath, string searchpattern)
         {
-            return Directory.GetDirectories(directoryPath, searchpattern);
+            return Directory.EnumerateDirectories(directoryPath, searchpattern);
+        }
+
+        public IEnumerable<string> EnumerateEntriesInDirectory(string directoryPath, string searchpattern)
+        {
+            return Directory.EnumerateFileSystemEntries(directoryPath, searchpattern);
         }
 
         public Stream OpenRead(string filePath)
@@ -62,10 +68,6 @@ namespace FragmentedFileUpload
         public bool FileExists(string filePath)
         {
             return File.Exists(filePath);
-        }
-
-        public void DeleterFile(string filePath)
-        {
         }
 
         public bool DirectoryExists(string directoryPath)

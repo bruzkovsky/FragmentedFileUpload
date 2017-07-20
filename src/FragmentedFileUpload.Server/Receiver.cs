@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net.Http;
 using FragmentedFileUpload.Extensions;
 
 namespace FragmentedFileUpload.Server
@@ -42,9 +41,11 @@ namespace FragmentedFileUpload.Server
                 throw new InvalidOperationException("Output path cannot be null or whitespace.");
             if (string.IsNullOrWhiteSpace(Hash))
                 throw new InvalidOperationException("Hash cannot be null or whitespace.");
-            if (!FileSystem.DirectoryExists(TempPath))
-                FileSystem.CreateDirectory(TempPath);
-            var partFilePath = FileSystem.PathCombine(TempPath, fileName);
+
+            var partFilePath = FileSystem.PathCombine(TempPath, Hash, fileName);
+            var partDirectoryName = FileSystem.GetDirectoryName(partFilePath);
+            if (!FileSystem.DirectoryExists(partDirectoryName))
+                FileSystem.CreateDirectory(partDirectoryName);
             if (FileSystem.FileExists(partFilePath))
                 FileSystem.DeleteFile(partFilePath);
             using (var tempStream = FileSystem.CreateFile(partFilePath))

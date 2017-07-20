@@ -141,9 +141,9 @@ namespace FragmentedFileUpload.Client.Tests
         {
             // Arrange
             const string hash = "123456789";
-            _fileSystemMock.Setup(f => f.GetDirectoriesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
+            _fileSystemMock.Setup(f => f.EnumerateDirectoriesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(new[] { hash });
-            _fileSystemMock.Setup(f => f.GetFilesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
+            _fileSystemMock.Setup(f => f.EnumerateFilesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(new[] {"file1", "file2", "file3"});
             _fileSystemMock.Setup(f => f.GetFileName(It.IsAny<string>())).Returns((string s) => Path.GetFileName(s));
             const string url = "https://this.is.a.valid/url";

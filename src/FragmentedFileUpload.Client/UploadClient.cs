@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -118,6 +119,9 @@ namespace FragmentedFileUpload.Client
                     }
 
                     FileSystem.DeleteFile(partFilePath);
+                    var directoryPath = FileSystem.GetDirectoryName(partFilePath);
+                    if (!FileSystem.EnumerateEntriesInDirectory(directoryPath, "*").Any())
+                        FileSystem.DeleteDirectory(directoryPath, false);
                 }
             }
         }
@@ -137,14 +141,14 @@ namespace FragmentedFileUpload.Client
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var directoryNames = FileSystem.GetDirectoriesInDirectory(TempFolderPath, "");
+            var directoryNames = FileSystem.EnumerateDirectoriesInDirectory(TempFolderPath, "*");
             foreach (var directoryName in directoryNames)
             {
                 var fileNames =
-                    FileSystem.GetFilesInDirectory(FileSystem.PathCombine(TempFolderPath, directoryName), "");
+                    FileSystem.EnumerateFilesInDirectory(FileSystem.PathCombine(TempFolderPath, directoryName), "*");
                 foreach (var fileName in fileNames)
                 {
-                    await UploadPart(FileSystem.PathCombine(TempFolderPath, fileName), directoryName);
+                    await UploadPart(FileSystem.PathCombine(TempFolderPath, fileName), FileSystem.GetFileName(directoryName));
                     cancellationToken.ThrowIfCancellationRequested();
                 }
             }
