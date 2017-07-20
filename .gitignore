@@ -8,3 +8,5 @@ obj
 packages
 /MVCServer/MVCApp/MVCApp/App_Data
 /WinFileUpload/MVCApp/App_Data
+/src/MVCApp/App_Data
+*.user
