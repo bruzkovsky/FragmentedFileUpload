@@ -19,6 +19,7 @@ namespace FragmentedFileUpload
         Stream OpenRead(string filePath);
         void CopyFileToStream(string file, Stream stream);
         void DeleteDirectory(string directoryPath, bool recursive);
+        IEnumerable<string> GetDirectoriesInDirectory(string directoryPath, string searchpattern);
     }
 
     public class FileSystemService : IFileSystemService
@@ -41,6 +42,11 @@ namespace FragmentedFileUpload
         public IEnumerable<string> GetFilesInDirectory(string directoryPath, string searchpattern)
         {
             return Directory.GetFiles(directoryPath, searchpattern);
+        }
+
+        public IEnumerable<string> GetDirectoriesInDirectory(string directoryPath, string searchpattern)
+        {
+            return Directory.GetDirectories(directoryPath, searchpattern);
         }
 
         public Stream OpenRead(string filePath)

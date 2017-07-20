@@ -53,7 +53,7 @@ namespace FragmentedFileUpload.Client
             FileSystem = fileSystemService;
         }
 
-        public async Task<bool> UploadFile(CancellationToken cancellationToken)
+        public async Task<bool> UploadFile(CancellationToken cancellationToken = default(CancellationToken))
         {
             if (string.IsNullOrWhiteSpace(FilePath))
                 throw new InvalidOperationException("File path cannot be null or empty.");
@@ -70,7 +70,7 @@ namespace FragmentedFileUpload.Client
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var splitter = FileSplitter.Create(FilePath, FileSystem.PathCombine(TempFolderPath, hash));
+            var splitter = FileSplitter.Create(FilePath, FileSystem.PathCombine(TempFolderPath, hash), FileSystem);
             splitter.MaxChunkSizeMegaByte = MaxChunkSizeMegaByte;
             splitter.SplitFile();
 
@@ -116,11 +116,30 @@ namespace FragmentedFileUpload.Client
 
         private string ComputeSha256Hash(string filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
-
             using (var stream = FileSystem.OpenRead(filePath))
                 return stream.ComputeSha256Hash();
+        }
+
+        public async Task ResumeUpload(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (string.IsNullOrWhiteSpace(UploadUrl))
+                throw new InvalidOperationException("URL cannot be null or empty.");
+            if (string.IsNullOrWhiteSpace(TempFolderPath))
+                throw new InvalidOperationException("Temporary folder path cannot be null or empty.");
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var directoryNames = FileSystem.GetDirectoriesInDirectory(TempFolderPath, "");
+            foreach (var directoryName in directoryNames)
+            {
+                var fileNames =
+                    FileSystem.GetFilesInDirectory(FileSystem.PathCombine(TempFolderPath, directoryName), "");
+                foreach (var fileName in fileNames)
+                {
+                    await UploadPart(FileSystem.PathCombine(TempFolderPath, fileName), directoryName);
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+            }
         }
     }
 }

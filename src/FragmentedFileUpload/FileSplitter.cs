@@ -54,7 +54,7 @@ namespace FragmentedFileUpload
             const int readbufferSize = 1024;
             var fsBuffer = new byte[readbufferSize];
             // adapted from: http://stackoverflow.com/questions/3967541/how-to-split-large-files-efficiently
-            using (var stream = FileSystem.OpenOrCreate(FilePath))
+            using (var stream = FileSystem.OpenRead(FilePath))
             {
                 var totalFileParts = (int) Math.Ceiling(stream.Length / (float) bufferChunkSize);
                 // make digit count the same for index and total. Example: xyz.part_003.100 (D3) or xyz.part_03.10 (D2)

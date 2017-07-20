@@ -8,7 +8,8 @@ namespace FragmentedFileUpload.Extensions
     {
         public static string ComputeSha256Hash(this Stream stream)
         {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
 
             using (var algorithm = SHA256.Create())
             {

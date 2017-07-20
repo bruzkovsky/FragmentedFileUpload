@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using Moq;
 using NUnit.Framework;
 
@@ -16,11 +15,13 @@ namespace FragmentedFileUpload.Client.Tests
         {
             _fileSystemMock = new Mock<IFileSystemService>();
             _fileSystemMock.Setup(f => f.CreateFile(It.IsAny<string>()))
-                .Returns(() => new MemoryStream(Encoding.UTF8.GetBytes("create")));
-            _fileSystemMock.Setup(f => f.OpenRead(It.IsAny<string>()))
-                .Returns(() => new MemoryStream(Encoding.UTF8.GetBytes("open")));
+                .Returns(() => new MemoryStream());
             _fileSystemMock.Setup(f => f.GetFilesInDirectory(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new[] {"any.part_1.3", "any.part_2.3", "any.part_3.3"});
+                .Returns(new[]
+                {
+                    "any.part_01.11", "any.part_02.11", "any.part_03.11", "any.part_04.11", "any.part_05.11", "any.part_06.11",
+                    "any.part_07.11", "any.part_08.11", "any.part_09.11", "any.part_10.11", "any.part_11.11"
+                });
             _fileSystemMock.Setup(f => f.GetDirectoryName(It.IsAny<string>())).Returns((string s) => s);
             _fileSystemMock.Setup(f => f.GetFileName(It.IsAny<string>())).Returns((string s) => s);
         }
@@ -97,12 +98,28 @@ namespace FragmentedFileUpload.Client.Tests
             _fileSystemMock.Setup(f => f.DirectoryExists(It.IsAny<string>())).Returns(true)
                 .Verifiable();
             var callOrder = 0;
-            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_1.3", It.IsAny<Stream>()))
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_01.11", It.IsAny<Stream>()))
                 .Callback(() => Assert.AreEqual(0, callOrder++)).Verifiable();
-            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_2.3", It.IsAny<Stream>()))
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_02.11", It.IsAny<Stream>()))
                 .Callback(() => Assert.AreEqual(1, callOrder++)).Verifiable();
-            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_3.3", It.IsAny<Stream>()))
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_03.11", It.IsAny<Stream>()))
                 .Callback(() => Assert.AreEqual(2, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_04.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(3, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_05.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(4, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_06.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(5, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_07.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(6, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_08.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(7, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_09.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(8, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_10.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(9, callOrder++)).Verifiable();
+            _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_11.11", It.IsAny<Stream>()))
+                .Callback(() => Assert.AreEqual(10, callOrder++)).Verifiable();
 
             var merger = CreateMerger("input.part_1.1", "output");
 
