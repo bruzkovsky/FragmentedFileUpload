@@ -1,3 +1,6 @@
+
+#tool "nuget:?package=NUnit.ConsoleRunner"
+
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
 //////////////////////////////////////////////////////////////////////
@@ -43,8 +46,15 @@ Task("Build")
     }
 });
 
-Task("NuGet")
+Task("Test")
     .IsDependentOn("Build")
+    .Does(() =>
+    {
+        NUnit3("./src/build/tests/bin/" + configuration + "/**/*.Tests.dll");
+    });
+
+Task("NuGet")
+    .IsDependentOn("Test")
     .Does (() =>
 {
     if(!DirectoryExists("./build/nuget/"))

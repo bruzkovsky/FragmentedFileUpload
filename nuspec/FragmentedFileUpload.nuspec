@@ -13,6 +13,9 @@
     <summary>Tool for splitting large files before uploading to a web-service.</summary>
     <copyright>Copyright © 2017</copyright>
     <tags>netstandard, netcore, file, upload, plugin, android, ios, windows</tags>
+    <dependencies>
+        <dependency id="NETStandard.Library" version="[1.6,2)" />
+    </dependencies>
     <references>
       <!--netstandard-->
       <group targetFramework="netstandard1.3">

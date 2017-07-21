@@ -6,10 +6,9 @@
 bin
 obj
 packages
-/MVCServer/MVCApp/MVCApp/App_Data
-/WinFileUpload/MVCApp/App_Data
-/src/MVCApp/App_Data
+App_Data
 *.user
 /src/tools
 /tools
 build
+/TestResult.xml
