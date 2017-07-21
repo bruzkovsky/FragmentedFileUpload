@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using FragmentedFileUpload.Constants;
+using FragmentedFileUpload.Services;
 
-namespace FragmentedFileUpload
+namespace FragmentedFileUpload.Core
 {
     public sealed class FileSplitter
     {

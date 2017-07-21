@@ -2,8 +2,9 @@
 using System.IO;
 using System.Linq;
 using FragmentedFileUpload.Constants;
+using FragmentedFileUpload.Services;
 
-namespace FragmentedFileUpload
+namespace FragmentedFileUpload.Core
 {
     public class FileMerger
     {

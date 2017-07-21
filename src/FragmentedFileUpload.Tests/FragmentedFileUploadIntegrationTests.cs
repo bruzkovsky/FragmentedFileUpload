@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using FragmentedFileUpload.Client;
 using FragmentedFileUpload.Extensions;
 using FragmentedFileUpload.Server;
+using FragmentedFileUpload.Services;
 using NUnit.Framework;
 
-namespace FragmentedFileUpload.IntegrationTests
+namespace FragmentedFileUpload.Tests
 {
     [TestFixture]
+    [Category("IntegrationTests")]
     public class FragmentedFileUploadIntegrationTests
     {
         private static string UploadPath { get; } = Path.Combine(BinFolder, "Server", "Temp");

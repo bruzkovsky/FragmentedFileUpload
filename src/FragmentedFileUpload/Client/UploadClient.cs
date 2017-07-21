@@ -6,7 +6,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using FragmentedFileUpload.Core;
 using FragmentedFileUpload.Extensions;
+using FragmentedFileUpload.Services;
 
 namespace FragmentedFileUpload.Client
 {

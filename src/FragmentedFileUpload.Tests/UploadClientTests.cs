@@ -8,12 +8,14 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FragmentedFileUpload.Client;
 using FragmentedFileUpload.Constants;
 using FragmentedFileUpload.Extensions;
+using FragmentedFileUpload.Services;
 using Moq;
 using NUnit.Framework;
 
-namespace FragmentedFileUpload.Client.Tests
+namespace FragmentedFileUpload.Tests
 {
     [TestFixture]
     public class UploadClientTests

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using FragmentedFileUpload.Core;
 using FragmentedFileUpload.Extensions;
+using FragmentedFileUpload.Services;
 
 namespace FragmentedFileUpload.Server
 {

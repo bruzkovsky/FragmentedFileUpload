@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using FragmentedFileUpload.Constants;
+using FragmentedFileUpload.Core;
+using FragmentedFileUpload.Services;
 using Moq;
 using NUnit.Framework;
 

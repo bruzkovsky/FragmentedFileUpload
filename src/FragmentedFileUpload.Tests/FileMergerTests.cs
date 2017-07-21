@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using FragmentedFileUpload.Core;
+using FragmentedFileUpload.Services;
 using Moq;
 using NUnit.Framework;
 

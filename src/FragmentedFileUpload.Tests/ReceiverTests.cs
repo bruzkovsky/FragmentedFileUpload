@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using FragmentedFileUpload.Server;
+using FragmentedFileUpload.Services;
 using Moq;
 using NUnit.Framework;
 
-namespace FragmentedFileUpload.Server.Tests
+namespace FragmentedFileUpload.Tests
 {
     [TestFixture]
     public class ReceiverTests
