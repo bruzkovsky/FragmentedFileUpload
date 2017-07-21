@@ -12,3 +12,4 @@ packages
 *.user
 /src/tools
 /tools
+build

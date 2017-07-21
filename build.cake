@@ -4,7 +4,7 @@
 
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
-var version = EnvironmentVariable("APPVEYOR_BUILD_VERSION") ?? Argument("version", "2.0.0.0-beta");
+var version = EnvironmentVariable("APPVEYOR_BUILD_VERSION") ?? Argument("version", "1.0.0.0-beta");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -43,7 +43,23 @@ Task("Build")
     }
 });
 
+Task("NuGet")
+    .IsDependentOn("Build")
+    .Does (() =>
+{
+    if(!DirectoryExists("./build/nuget/"))
+        CreateDirectory("./build/nuget");
+        
+    NuGetPack(nuspec, new NuGetPackSettings {
+        ArgumentCustomization = args=>args.Append("-Properties configuration=" + configuration),
+        BasePath = "./",
+        OutputDirectory = "./build/nuget/",
+        Verbosity = NuGetVerbosity.Detailed,
+        Version = version
+    });	
+});
+
 Task("Default")
-  .IsDependentOn("Build");
+  .IsDependentOn("NuGet");
 
 RunTarget(target);

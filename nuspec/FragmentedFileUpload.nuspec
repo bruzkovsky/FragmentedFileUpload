@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>FragmentedFileUpload</id>
+    <version>$version$</version>
+    <title>FragmentedFileUpload tool</title>
+    <authors>Matthias Bruzek</authors>
+    <owners>Matthias Bruzek</owners>
+    <licenseUrl>https://github.com/bruzkovsky/FragmentedFileUpload/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bruzkovsky/FragmentedFileUpload</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Split large files into chunks before uploading them for a better performance!</description>
+    <summary>Tool for splitting large files before uploading to a web-service.</summary>
+    <copyright>Copyright © 2017</copyright>
+    <tags>netstandard, netcore, file, upload, plugin, android, ios, windows</tags>
+    <references>
+      <!--netstandard-->
+      <group targetFramework="netstandard1.3">
+        <reference file="FragmentedFileUpload.dll" />
+      </group>
+    </references>
+  </metadata>
+  <files>
+    <file src="src\build\bin\$configuration$\netstandard1.3\FragmentedFileUpload.dll" target="lib\netstandard1.3" />
+    <file src="src\build\bin\$configuration$\netstandard1.3\FragmentedFileUpload.*pdb" target="lib\netstandard1.3" />
+    <file src="src\build\bin\$configuration$\netstandard1.3\FragmentedFileUpload.*xml" target="lib\netstandard1.3" />
+  </files>
+</package>
