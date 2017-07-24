@@ -31,10 +31,11 @@ namespace FragmentedFileUpload.Tests
             Func<HttpClient, HttpClient> authorizeClient = null,
             Func<HttpClient> httpClientFactory = null,
             IFileSystemService fileSystemService = null,
+            Action<HttpResponseMessage> onRequestComplete = null,
             Action<HttpStatusCode> onRequestFailed = null)
         {
             return UploadClient.Create(filePath, url, tempPath, authorizeClient,
-                httpClientFactory ?? (() => new HttpClient(new WebApiKeyHandler())), onRequestFailed, fileSystemService);
+                httpClientFactory ?? (() => new HttpClient(new WebApiKeyHandler())), onRequestComplete, onRequestFailed, fileSystemService);
         }
 
         [SetUp]

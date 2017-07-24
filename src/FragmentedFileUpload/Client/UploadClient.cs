@@ -31,6 +31,7 @@ namespace FragmentedFileUpload.Client
 
         public Func<HttpClient, HttpClient> AuthorizeClient { private get; set; }
         public Func<HttpClient> ClientFactory { private get; set; }
+        public Action<HttpResponseMessage> OnRequestComplete { private get; set; }
         public Action<HttpStatusCode> OnRequestFailed { private get; set; }
         public IFileSystemService FileSystem { private get; set; }
 
@@ -40,6 +41,7 @@ namespace FragmentedFileUpload.Client
             string tempFolderPath,
             Func<HttpClient, HttpClient> authorizeClient = null,
             Func<HttpClient> httpClient = null,
+            Action<HttpResponseMessage> onRequestComplete = null,
             Action<HttpStatusCode> onRequestFailed = null,
             IFileSystemService fileSystemService = null)
         {
@@ -50,6 +52,7 @@ namespace FragmentedFileUpload.Client
                 UploadUrl = uploadUrl,
                 TempFolderPath = tempFolderPath,
                 AuthorizeClient = authorizeClient,
+                OnRequestComplete = onRequestComplete,
                 OnRequestFailed = onRequestFailed
             };
         }
@@ -83,16 +86,18 @@ namespace FragmentedFileUpload.Client
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            var result = new HttpResponseMessage(HttpStatusCode.OK);
             foreach (var file in splitter.FileParts)
             {
-                await UploadPart(file, hash);
+                result = await UploadPart(file, hash);
                 cancellationToken.ThrowIfCancellationRequested();
             }
+            OnRequestComplete?.Invoke(result);
 
             return true;
         }
 
-        private async Task UploadPart(string partFilePath, string hash)
+        private async Task<HttpResponseMessage> UploadPart(string partFilePath, string hash)
         {
             using (var client = ClientFactory())
             {
@@ -117,13 +122,15 @@ namespace FragmentedFileUpload.Client
                     if (!result.IsSuccessStatusCode)
                     {
                         OnRequestFailed?.Invoke(result.StatusCode);
-                        return;
+                        return result;
                     }
 
                     FileSystem.DeleteFile(partFilePath);
                     var directoryPath = FileSystem.GetDirectoryName(partFilePath);
                     if (!FileSystem.EnumerateEntriesInDirectory(directoryPath, "*").Any())
                         FileSystem.DeleteDirectory(directoryPath, false);
+
+                    return result;
                 }
             }
         }
