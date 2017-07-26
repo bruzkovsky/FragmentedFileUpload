@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +34,11 @@ namespace SampleClient
         {
             var tempFolderPath = Path.Combine(CurrentFolder, "Temp");
             const string requestUri = "http://localhost:8170/Home/UploadFile/";
-            var uploadClient = UploadClient.Create(fileName, requestUri, tempFolderPath);
+            var uploadClient = UploadClient.Create(fileName, requestUri, tempFolderPath, onRequestComplete: async r =>
+            {
+                var content = await r.Content.ReadAsStringAsync();
+                Debug.WriteLine(content);
+            });
             return await uploadClient.UploadFile(CancellationToken.None);
         }
         

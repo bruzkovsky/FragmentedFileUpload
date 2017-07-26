@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Web;
 using System.Web.Mvc;
 using FragmentedFileUpload.Server;
@@ -42,24 +40,16 @@ namespace SampleServer.Controllers
 
         // generic file post method - use in MVC or WebAPI
         [HttpPost]
-        public HttpResponseMessage UploadFile(HttpPostedFileBase file, string hash, string partHash)
+        public string UploadFile(HttpPostedFileBase file, string hash, string partHash)
         {
             var uploadPath = Server.MapPath($"~/App_Data/uploads");
             var outputPath = Server.MapPath("~/App_Data/imported/");
             if (file == null || file.ContentLength <= 0)
-                return new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    Content = new StringContent("The file is empty or missing.")
-                };
+                throw new InvalidOperationException("The file is empty or missing.");
 
             var fileName = Path.GetFileName(file.FileName);
             if (string.IsNullOrEmpty(fileName))
-                return new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    Content = new StringContent("The filename was not set.")
-                };
+                throw new InvalidOperationException("The filename was not set.");
 
             // take the input stream, and save it to a temp folder using the original file.part name posted
             using (var stream = file.InputStream)
@@ -71,19 +61,11 @@ namespace SampleServer.Controllers
                 }
                 catch (InvalidOperationException e)
                 {
-                    return new HttpResponseMessage
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Content = new StringContent(e.Message)
-                    };
+                    throw new InvalidOperationException(e.Message);
                 }
             }
 
-            return new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent("File uploaded.")
-            };
+            return "{\"fileEntryIds\": [\"b4c1cd59-e842-45d4-b0e0-13b9ea2247f5\"]}";
         }
     }
 }

@@ -36,22 +36,7 @@ namespace FragmentedFileUpload.Tests
         {
             // Arrange
             _fileSystemMock.Setup(f => f.FileExists(It.IsAny<string>())).Returns(true);
-            var merger = CreateMerger(inputPath, "any");
-
-            // Act
-            Assert.Throws<InvalidOperationException>(() => merger.MergeFile());
-        }
-
-        [Test]
-        [TestCase(null)]
-        [TestCase("")]
-        [TestCase(" ")]
-        public void WhenOutputFilePathIsInvalid_AndMergeFileIsCalled_FailsWithInvalidOperationException(
-            string outputFilePath)
-        {
-            // Arrange
-            _fileSystemMock.Setup(f => f.FileExists(It.IsAny<string>())).Returns(true);
-            var merger = CreateMerger("input.part_1.1", outputFilePath);
+            var merger = CreateMerger(inputPath);
 
             // Act
             Assert.Throws<InvalidOperationException>(() => merger.MergeFile());
@@ -63,30 +48,10 @@ namespace FragmentedFileUpload.Tests
             // Arrange
             _fileSystemMock.Setup(f => f.DirectoryExists(It.IsAny<string>())).Returns(false)
                 .Verifiable("FileExists not called.");
-            var merger = CreateMerger("input.part_1.1", "any");
+            var merger = CreateMerger("input.part_1.1");
 
             // Act
             Assert.Throws<DirectoryNotFoundException>(() => merger.MergeFile());
-
-            // Assert
-            _fileSystemMock.Verify();
-        }
-
-        [Test]
-        public void WhenOutputDirectoryDoesNotExist_AndMergeFileIsCalled_OutputDirectoryIsCreated()
-        {
-            // Arrange
-            _fileSystemMock.Setup(f => f.FileExists(It.IsAny<string>())).Returns(true);
-            _fileSystemMock.Setup(f => f.DirectoryExists("input.part_1.1")).Returns(true).Verifiable("DirectoryExist with input not called.");
-            _fileSystemMock.Setup(f => f.GetDirectoryName("output")).Returns("output");
-            _fileSystemMock.Setup(f => f.DirectoryExists("output")).Returns(false)
-                .Verifiable("DirectoryExists not called.");
-            _fileSystemMock.Setup(f => f.CreateDirectory(It.IsAny<string>())).Verifiable("CreateDirectory not called.");
-
-            var merger = CreateMerger("input.part_1.1", "output");
-
-            // Act
-            merger.MergeFile();
 
             // Assert
             _fileSystemMock.Verify();
@@ -123,7 +88,7 @@ namespace FragmentedFileUpload.Tests
             _fileSystemMock.Setup(f => f.CopyFileToStream("any.part_11.11", It.IsAny<Stream>()))
                 .Callback(() => Assert.AreEqual(10, callOrder++)).Verifiable();
 
-            var merger = CreateMerger("input.part_1.1", "output");
+            var merger = CreateMerger("input.part_1.1");
 
             // Act
             merger.MergeFile();
@@ -132,9 +97,9 @@ namespace FragmentedFileUpload.Tests
             _fileSystemMock.Verify();
         }
 
-        private FileMerger CreateMerger(string inputPath, string outputFilePath)
+        private FileMerger CreateMerger(string inputPath)
         {
-            var merger = FileMerger.Create(inputPath, outputFilePath, _fileSystemMock.Object);
+            var merger = FileMerger.Create(inputPath, _fileSystemMock.Object);
             return merger;
         }
     }

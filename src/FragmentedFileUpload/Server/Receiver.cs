@@ -6,26 +6,38 @@ using FragmentedFileUpload.Services;
 
 namespace FragmentedFileUpload.Server
 {
-    public class Receiver
+    public interface IReceiver
     {
-        public string TempPath { get; set; }
-        public string OutputPath { get; set; }
-        public string Hash { get; set; }
-        public IFileSystemService FileSystem { get; set; }
+        string TempPath { set; }
+        Action<Stream> OnResult { set; }
+        string Hash { set; }
+        IFileSystemService FileSystem { set; }
+        Func<string, IFileSystemService, IFileMerger> FileMergerFactory { set; }
+        void Receive(Stream fileStream, string fileName, string originalPartHash);
+    }
 
-        public static Receiver Create(string tempPath, string outputPath, string hash, IFileSystemService fileSystemService = null)
+    public sealed class Receiver : IReceiver
+    {
+        public string TempPath { private get; set; }
+        public Action<Stream> OnResult { private get; set; }
+        public string Hash { private get; set; }
+        public IFileSystemService FileSystem { private get; set; }
+        public Func<string, IFileSystemService, IFileMerger> FileMergerFactory { private get; set; }
+
+        public static Receiver Create(string tempPath, Action<Stream> onResult, string hash, IFileSystemService fileSystemService = null, Func<string, IFileSystemService, IFileMerger> fileMergerFactory = null)
         {
-            return new Receiver(fileSystemService ?? new FileSystemService())
+            return new Receiver(fileSystemService ?? new FileSystemService(), fileMergerFactory ?? FileMerger.Create)
             {
                 TempPath = tempPath,
-                OutputPath = outputPath,
+                OnResult = onResult,
                 Hash = hash
             };
         }
 
-        private Receiver(IFileSystemService fileSystemService)
+        private Receiver(IFileSystemService fileSystemService, Func<string, IFileSystemService, IFileMerger> fileMergerFactory)
         {
             FileSystem = fileSystemService;
+            FileMergerFactory = fileMergerFactory;
         }
 
         public void Receive(Stream fileStream, string fileName, string originalPartHash)
@@ -39,8 +51,6 @@ namespace FragmentedFileUpload.Server
 
             if (string.IsNullOrWhiteSpace(TempPath))
                 throw new InvalidOperationException("Temporary path cannot be null or whitespace.");
-            if (string.IsNullOrWhiteSpace(OutputPath))
-                throw new InvalidOperationException("Output path cannot be null or whitespace.");
             if (string.IsNullOrWhiteSpace(Hash))
                 throw new InvalidOperationException("Hash cannot be null or whitespace.");
 
@@ -60,20 +70,23 @@ namespace FragmentedFileUpload.Server
                     throw new InvalidOperationException("Part hash does not match.");
             }
 
-            var merger = FileMerger.Create(partFilePath, OutputPath);
-            var outputFilePath = merger.MergeFile();
-
-            if (outputFilePath == null)
-                return;
-
-            if (!FileSystem.FileExists(outputFilePath))
-                throw new InvalidOperationException("The parts could not be merged.");
-
-            using (var resultStream = FileSystem.OpenRead(outputFilePath))
+            var merger = FileMergerFactory(partFilePath, FileSystem);
+            using (var resultStream = merger.MergeFile())
             {
-                var resultHash = resultStream.ComputeSha256Hash();
-                if (!string.Equals(resultHash, Hash))
-                    throw new InvalidOperationException("The hash of the merged file does not match.");
+                if (resultStream == null)
+                    return;
+
+                try
+                {
+                    var resultHash = resultStream.ComputeSha256Hash();
+                    if (!string.Equals(resultHash, Hash))
+                        throw new InvalidOperationException("The hash of the merged file does not match.");
+                    OnResult?.Invoke(resultStream);
+                }
+                finally
+                {
+                    FileSystem.DeleteDirectory(FileSystem.PathCombine(TempPath, Hash), true);
+                }
             }
         }
     }

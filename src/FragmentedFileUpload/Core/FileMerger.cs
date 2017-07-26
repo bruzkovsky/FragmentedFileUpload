@@ -2,30 +2,35 @@
 using System.IO;
 using System.Linq;
 using FragmentedFileUpload.Constants;
+using FragmentedFileUpload.Extensions;
 using FragmentedFileUpload.Services;
 
 namespace FragmentedFileUpload.Core
 {
-    public class FileMerger
+    public interface IFileMerger
     {
-        public string InputFilePath { get; set; }
-        public string OutputDirectoryPath { get; set; }
+        string InputFilePath { set; }
+        IFileSystemService FileSystem { set; }
+        Stream MergeFile();
+    }
+
+    public class FileMerger : IFileMerger
+    {
+        public string InputFilePath { private get; set; }
 
         public IFileSystemService FileSystem { private get; set; }
 
-        public string MergeFile()
+        public Stream MergeFile()
         {
             if (string.IsNullOrWhiteSpace(InputFilePath))
                 throw new InvalidOperationException("Input path cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(OutputDirectoryPath))
-                throw new InvalidOperationException("Output path cannot be null or empty.");
 
             var inputDirectory = FileSystem.GetDirectoryName(InputFilePath);
             if (!FileSystem.DirectoryExists(inputDirectory))
                 throw new DirectoryNotFoundException("Input path does not exist.");
 
             var fileName = FileSystem.GetFileName(InputFilePath);
-            var baseFileName = fileName.Remove(fileName.IndexOf(Naming.PartToken, StringComparison.Ordinal));
+            var baseFileName = fileName.GetBaseName();
             var searchpattern = $"{baseFileName}{Naming.PartToken}*";
             var orderedFiles = FileSystem.EnumerateFilesInDirectory(inputDirectory, searchpattern)
                 .OrderBy(s => s).ToArray();
@@ -36,25 +41,16 @@ namespace FragmentedFileUpload.Core
             if (orderedFiles.Length != fileCount)
                 return null;
 
-            // ensure output directory exists and there is no file with the same name
-            var outputFilePath = FileSystem.PathCombine(OutputDirectoryPath, baseFileName);
-            if (FileSystem.FileExists(outputFilePath))
-                FileSystem.DeleteFile(outputFilePath);
-            if (!FileSystem.DirectoryExists(OutputDirectoryPath))
-                FileSystem.CreateDirectory(OutputDirectoryPath);
-
-            using (var stream = FileSystem.CreateFile(outputFilePath))
+            var stream = new MemoryStream();
+            foreach (var file in orderedFiles)
             {
-                foreach (var file in orderedFiles)
-                {
-                    if (!FileSystem.FileExists(file))
-                        throw new FileNotFoundException("Part not found.", file);
+                if (!FileSystem.FileExists(file))
+                    throw new FileNotFoundException("Part not found.", file);
 
-                    FileSystem.CopyFileToStream(file, stream);
-                }
+                FileSystem.CopyFileToStream(file, stream);
             }
-
-            return outputFilePath;
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
         }
 
         private FileMerger(IFileSystemService fileSystemService)
@@ -62,12 +58,11 @@ namespace FragmentedFileUpload.Core
             FileSystem = fileSystemService;
         }
 
-        public static FileMerger Create(string inputFilePath, string outputFilePath, IFileSystemService fileSystemService = null)
+        public static FileMerger Create(string inputFilePath, IFileSystemService fileSystemService = null)
         {
             return new FileMerger(fileSystemService ?? new FileSystemService())
             {
-                InputFilePath = inputFilePath,
-                OutputDirectoryPath = outputFilePath
+                InputFilePath = inputFilePath
             };
         }
     }

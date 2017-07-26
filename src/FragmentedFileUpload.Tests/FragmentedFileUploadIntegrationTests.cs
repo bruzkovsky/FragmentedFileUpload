@@ -144,7 +144,14 @@ namespace FragmentedFileUpload.Tests
             // take the input stream, and save it to a temp folder using the original file.part name posted
             using (var stream = file.ReadAsStreamAsync().Result)
             {
-                var receiver = Receiver.Create(UploadPath, OutputPath, hash);
+                var receiver = Receiver.Create(UploadPath, s =>
+                {
+                    var filePath = Path.Combine(OutputPath, fileName.GetBaseName());
+                    if (!Directory.Exists(OutputPath))
+                        Directory.CreateDirectory(OutputPath);
+                    using (var outStream = File.OpenWrite(filePath))
+                        s.CopyTo(outStream);
+                }, hash);
                 try
                 {
                     receiver.Receive(stream, fileName, partHash);

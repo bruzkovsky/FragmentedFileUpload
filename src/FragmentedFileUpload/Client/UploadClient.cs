@@ -22,7 +22,22 @@ namespace FragmentedFileUpload.Client
         }
     }
 
-    public sealed class UploadClient
+    public interface IUploadClient
+    {
+        string FilePath { get; set; }
+        string UploadUrl { get; set; }
+        string TempFolderPath { get; set; }
+        double MaxChunkSizeMegaByte { get; set; }
+        Func<HttpClient, HttpClient> AuthorizeClient { set; }
+        Func<HttpClient> ClientFactory { set; }
+        Action<HttpResponseMessage> OnRequestComplete { set; }
+        Action<HttpStatusCode> OnRequestFailed { set; }
+        IFileSystemService FileSystem { set; }
+        Task<bool> UploadFile(CancellationToken cancellationToken = default(CancellationToken));
+        Task ResumeUpload(CancellationToken cancellationToken = default(CancellationToken));
+    }
+
+    public sealed class UploadClient : IUploadClient
     {
         public string FilePath { get; set; }
         public string UploadUrl { get; set; }
