@@ -7,3 +7,10 @@ Upload large files to MVC / WebAPI using partitioning
 Published at: http://www.codeproject.com/Articles/1034347/Upload-large-files-to-MVC-WebAPI-using-partitionin
 
 Sending large files to an MVC/Web-API server can be problematic - this article is about an alternative. The approach used is to break a large file up into small chunks, upload them, then merge them back together on the server - file transfer by partitioning. The article shows sending files to an MVC server from both a webpage using JavaScript, and a Web-form httpclient, and can be implemented using either MVC or WebAPI.
+
+
+## Icon Credit:
+
+[Vaadin](https://www.flaticon.com/authors/vaadin) from [www.flaticon.com](https://www.flaticon.com/) 
+
+Licensed by [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)
