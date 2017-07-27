@@ -50,6 +50,7 @@ namespace FragmentedFileUpload.Tests
         {
             RequestUrl = null;
             RequestContents.Clear();
+            ResponseMessageFactory = null;
 
             _fileSystemMock = new Mock<IFileSystemService>();
             _fileSystemMock.Setup(f => f.FileExists(It.IsAny<string>())).Returns(true);
@@ -169,7 +170,7 @@ namespace FragmentedFileUpload.Tests
             Assert.AreEqual(hash, file2Content.Contents.First(c => c.Headers.ContentDisposition.Name == "hash").ReadAsStringAsync().Result);
             var file3Content =
                 RequestContents.FirstOrDefault(
-                    r => r.Contents.Any(c => c.Headers.ContentDisposition.FileName == "file2"));
+                    r => r.Contents.Any(c => c.Headers.ContentDisposition.FileName == "file3"));
             Assert.NotNull(file3Content);
             Assert.AreEqual(hash, file3Content.Contents.First(c => c.Headers.ContentDisposition.Name == "hash").ReadAsStringAsync().Result);
         }

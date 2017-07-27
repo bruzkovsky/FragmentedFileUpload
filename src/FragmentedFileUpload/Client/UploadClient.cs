@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -102,14 +103,62 @@ namespace FragmentedFileUpload.Client
             cancellationToken.ThrowIfCancellationRequested();
 
             var result = new HttpResponseMessage(HttpStatusCode.OK);
-            foreach (var file in splitter.FileParts)
-            {
-                result = await UploadPart(file, hash);
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            var parts = splitter.FileParts;
+            if (!await UploadAllParts(parts, hash, cancellationToken))
+                return false;
             OnRequestComplete?.Invoke(result);
 
             return true;
+        }
+
+        public async Task ResumeUpload(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (string.IsNullOrWhiteSpace(UploadUrl))
+                throw new InvalidOperationException("URL cannot be null or empty.");
+            if (string.IsNullOrWhiteSpace(TempFolderPath))
+                throw new InvalidOperationException("Temporary folder path cannot be null or empty.");
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var directoryNames = FileSystem.EnumerateDirectoriesInDirectory(TempFolderPath, "*");
+            foreach (var directoryName in directoryNames)
+            {
+                var fileNames =
+                    FileSystem.EnumerateFilesInDirectory(FileSystem.PathCombine(TempFolderPath, directoryName), "*");
+                await UploadAllParts(fileNames, FileSystem.GetFileName(directoryName), cancellationToken);
+            }
+        }
+
+        private async Task<bool> UploadAllParts(
+            IEnumerable<string> parts,
+            string hash,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            foreach (var file in parts)
+            {
+                var result = await UploadPart(file, hash);
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (!result.IsSuccessStatusCode)
+                {
+                    OnRequestFailed?.Invoke(result.StatusCode);
+                    return false;
+                }
+
+                DeletePart(file);
+
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+            return true;
+        }
+
+        private void DeletePart(string file)
+        {
+            FileSystem.DeleteFile(file);
+            var directoryPath = FileSystem.GetDirectoryName(file);
+            if (!FileSystem.EnumerateEntriesInDirectory(directoryPath, "*").Any())
+                FileSystem.DeleteDirectory(directoryPath, false);
         }
 
         private async Task<HttpResponseMessage> UploadPart(string partFilePath, string hash)
@@ -133,19 +182,7 @@ namespace FragmentedFileUpload.Client
                     content.Add(hashContent, "hash");
                     content.Add(partHashContent, "partHash");
 
-                    var result = await client.PostAsync(UploadUrl, content);
-                    if (!result.IsSuccessStatusCode)
-                    {
-                        OnRequestFailed?.Invoke(result.StatusCode);
-                        return result;
-                    }
-
-                    FileSystem.DeleteFile(partFilePath);
-                    var directoryPath = FileSystem.GetDirectoryName(partFilePath);
-                    if (!FileSystem.EnumerateEntriesInDirectory(directoryPath, "*").Any())
-                        FileSystem.DeleteDirectory(directoryPath, false);
-
-                    return result;
+                    return await client.PostAsync(UploadUrl, content);
                 }
             }
         }
@@ -154,28 +191,6 @@ namespace FragmentedFileUpload.Client
         {
             using (var stream = FileSystem.OpenRead(filePath))
                 return stream.ComputeSha256Hash();
-        }
-
-        public async Task ResumeUpload(CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (string.IsNullOrWhiteSpace(UploadUrl))
-                throw new InvalidOperationException("URL cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(TempFolderPath))
-                throw new InvalidOperationException("Temporary folder path cannot be null or empty.");
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var directoryNames = FileSystem.EnumerateDirectoriesInDirectory(TempFolderPath, "*");
-            foreach (var directoryName in directoryNames)
-            {
-                var fileNames =
-                    FileSystem.EnumerateFilesInDirectory(FileSystem.PathCombine(TempFolderPath, directoryName), "*");
-                foreach (var fileName in fileNames)
-                {
-                    await UploadPart(FileSystem.PathCombine(TempFolderPath, fileName), FileSystem.GetFileName(directoryName));
-                    cancellationToken.ThrowIfCancellationRequested();
-                }
-            }
         }
     }
 }
