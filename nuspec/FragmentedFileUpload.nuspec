@@ -8,6 +8,7 @@
     <owners>Matthias Bruzek</owners>
     <licenseUrl>https://github.com/bruzkovsky/FragmentedFileUpload/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/bruzkovsky/FragmentedFileUpload</projectUrl>
+    <iconUrl>https://github.com/bruzkovsky/FragmentedFileUpload/raw/master/ICON.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Split large files into chunks before uploading them for a better performance!</description>
     <summary>Tool for splitting large files before uploading to a web-service.</summary>
