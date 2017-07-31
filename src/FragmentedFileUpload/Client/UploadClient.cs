@@ -143,6 +143,7 @@ namespace FragmentedFileUpload.Client
                 }
                 catch (HttpRequestException)
                 {
+                    OnRequestFailed?.Invoke(HttpStatusCode.NotFound);
                     return false;
                 }
 
