@@ -57,7 +57,7 @@ namespace FragmentedFileUpload.Tests
             const string originalHash = "780faf7b15f08c3cce0fe02c26d932bbd36ffd393eee4e5e6c8e0e383a787fab";
             const string uploadUrl = "http://this.is.a/valid/url/";
             var client =
-                CreateUploadClient(Path.Combine(BinFolder, "TestData", fileName),
+                CreateUploadClient(Path.Combine(TestDataPath, fileName),
                     uploadUrl, TempPath);
             client.MaxChunkSizeMegaByte = 0.1;
 

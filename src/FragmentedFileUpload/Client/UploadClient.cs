@@ -136,7 +136,15 @@ namespace FragmentedFileUpload.Client
         {
             foreach (var file in parts)
             {
-                var result = await UploadPart(file, hash);
+                HttpResponseMessage result;
+                try
+                {
+                    result = await UploadPart(file, hash);
+                }
+                catch (HttpRequestException)
+                {
+                    return false;
+                }
 
                 cancellationToken.ThrowIfCancellationRequested();
 
