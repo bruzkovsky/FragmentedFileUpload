@@ -7,7 +7,7 @@
 
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
-var version = EnvironmentVariable("APPVEYOR_BUILD_VERSION") ?? Argument("version", "1.0.0.0-beta");
+var version = Argument("nuget_version", "1.0.0.0-beta");
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -49,9 +49,9 @@ Task("Build")
 Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
-    {
-        NUnit3("./src/build/tests/bin/" + configuration + "/**/*.Tests.dll");
-    });
+{
+    NUnit3("./src/build/tests/bin/" + configuration + "/**/*.Tests.dll");
+});
 
 Task("NuGet")
     .IsDependentOn("Test")
@@ -64,6 +64,7 @@ Task("NuGet")
         ArgumentCustomization = args=>args.Append("-Properties configuration=" + configuration),
         BasePath = "./",
         OutputDirectory = "./build/nuget/",
+        Symbols = true,
         Verbosity = NuGetVerbosity.Detailed,
         Version = version
     });	

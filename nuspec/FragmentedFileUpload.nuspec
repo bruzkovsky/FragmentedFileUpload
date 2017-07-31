@@ -28,5 +28,7 @@
     <file src="src\build\bin\$configuration$\netstandard1.3\FragmentedFileUpload.dll" target="lib\netstandard1.3" />
     <file src="src\build\bin\$configuration$\netstandard1.3\FragmentedFileUpload.*pdb" target="lib\netstandard1.3" />
     <file src="src\build\bin\$configuration$\netstandard1.3\FragmentedFileUpload.*xml" target="lib\netstandard1.3" />
+
+    <file src="src\FragmentedFileUpload\**\*.cs" target="src" exclude="**\obj\**\*.*" />
   </files>
 </package>
