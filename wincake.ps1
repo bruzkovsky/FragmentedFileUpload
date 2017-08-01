@@ -13,8 +13,6 @@ This is a Powershell script to bootstrap a Cake build.
 This Powershell script will download NuGet if missing, restore NuGet tools (including Cake)
 and execute your Cake build script with the parameters you provide.
 
-.PARAMETER Script
-The build script to execute.
 .PARAMETER Target
 The build script target to run.
 .PARAMETER Configuration
@@ -51,7 +49,7 @@ Param(
     [switch]$WhatIf,
     [switch]$Mono,
     [switch]$SkipToolPackageRestore,
-    [Parameter(Position=0,Mandatory=$false,ValueFromRemainingArguments=$true)]
+    [Parameter(Position=1,Mandatory=$false,ValueFromRemainingArguments=$true)]
     [string[]]$ScriptArgs
 )
 
