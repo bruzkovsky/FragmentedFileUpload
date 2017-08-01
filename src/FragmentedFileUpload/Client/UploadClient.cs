@@ -170,7 +170,7 @@ namespace FragmentedFileUpload.Client
                 FileSystem.DeleteDirectory(directoryPath, false);
         }
 
-        private async Task<HttpResponseMessage> UploadPart(string partFilePath, string hash)
+        private async Task<HttpResponseMessage> UploadPart(string partFilePath, string hash, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var client = ClientFactory())
             {
@@ -191,7 +191,7 @@ namespace FragmentedFileUpload.Client
                     content.Add(hashContent, "hash");
                     content.Add(partHashContent, "partHash");
 
-                    return await client.PostAsync(UploadUrl, content);
+                    return await client.PostAsync(UploadUrl, content, cancellationToken);
                 }
             }
         }
