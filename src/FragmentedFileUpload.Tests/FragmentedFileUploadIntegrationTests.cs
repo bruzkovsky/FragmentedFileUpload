@@ -58,7 +58,7 @@ namespace FragmentedFileUpload.Tests
             const string uploadUrl = "http://this.is.a/valid/url/";
             var client =
                 CreateUploadClient(Path.Combine(TestDataPath, fileName),
-                    uploadUrl, TempPath);
+                    uploadUrl, TempPath, onRequestComplete: async r => Assert.AreEqual("File uploaded.", await r.Content.ReadAsStringAsync()));
             client.MaxChunkSizeMegaByte = 0.1;
 
             // Act

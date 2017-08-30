@@ -102,9 +102,9 @@ namespace FragmentedFileUpload.Client
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var result = new HttpResponseMessage(HttpStatusCode.OK);
             var parts = splitter.FileParts;
-            if (!await UploadAllParts(parts, hash, cancellationToken))
+            var result = await UploadAllParts(parts, hash, cancellationToken);
+            if (!result.IsSuccessStatusCode)
                 return false;
             OnRequestComplete?.Invoke(result);
 
@@ -129,14 +129,14 @@ namespace FragmentedFileUpload.Client
             }
         }
 
-        private async Task<bool> UploadAllParts(
+        private async Task<HttpResponseMessage> UploadAllParts(
             IEnumerable<string> parts,
             string hash,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
             foreach (var file in parts)
             {
-                HttpResponseMessage result;
                 try
                 {
                     result = await UploadPart(file, hash);
@@ -144,7 +144,7 @@ namespace FragmentedFileUpload.Client
                 catch (HttpRequestException)
                 {
                     OnRequestFailed?.Invoke(HttpStatusCode.NotFound);
-                    return false;
+                    return new HttpResponseMessage(HttpStatusCode.NotFound);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -152,14 +152,14 @@ namespace FragmentedFileUpload.Client
                 if (!result.IsSuccessStatusCode)
                 {
                     OnRequestFailed?.Invoke(result.StatusCode);
-                    return false;
+                    return result;
                 }
 
                 DeletePart(file);
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
-            return true;
+            return result;
         }
 
         private void DeletePart(string file)
