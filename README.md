@@ -1,6 +1,6 @@
 # Split large files before uploading them to a remote service
 
-[![NuGet](https://img.shields.io/nuget/vpre/FragmentedFileUpload.svg)](https://www.nuget.org/packages/FragmentedFileUpload)
+[![NuGet](https://img.shields.io/nuget/v/FragmentedFileUpload.svg)](https://www.nuget.org/packages/FragmentedFileUpload)
 
 Initial idea came from this post:
 
