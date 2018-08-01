@@ -2,14 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\build\bin\Debug</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\build\bin\Release\</OutputPath>
+    <Authors>bruzkovsky</Authors>
+    <Company>Opti-Q GmbH</Company>
+    <Version>1.0.0</Version>
+    <Title>FragmentedFileUpload tool</Title>
+    <Description>Split large files into chunks before uploading them for a better performance!</Description>
+    <Copyright>Copyright © 2018</Copyright>
+    <PackageLicenseUrl>https://github.com/bruzkovsky/FragmentedFileUpload/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/bruzkovsky/FragmentedFileUpload</PackageProjectUrl>
+    <PackageIconUrl>https://github.com/bruzkovsky/FragmentedFileUpload/raw/master/ICON.png</PackageIconUrl>
+    <PackageTags>netstandard, netcore, file, upload, plugin, android, ios, windows</PackageTags>
   </PropertyGroup>
 
 </Project>

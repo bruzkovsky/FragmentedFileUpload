@@ -134,12 +134,12 @@ namespace FragmentedFileUpload.Client
             string hash,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            var result = new HttpResponseMessage(HttpStatusCode.OK);
             foreach (var file in parts)
             {
                 try
                 {
-                    result = await UploadPart(file, hash);
+                    result = await UploadPart(file, hash, cancellationToken);
                 }
                 catch (HttpRequestException)
                 {
@@ -182,12 +182,7 @@ namespace FragmentedFileUpload.Client
                 using (var partHashContent = new StringContent(partStream.ComputeSha256Hash()))
                 using (var hashContent = new StringContent(hash))
                 {
-                    fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-                    {
-                        FileName = FileSystem.GetFileName(partFilePath),
-                        Name = "file"
-                    };
-                    content.Add(fileContent);
+                    content.Add(fileContent, "file", FileSystem.GetFileName(partFilePath));
                     content.Add(hashContent, "hash");
                     content.Add(partHashContent, "partHash");
 

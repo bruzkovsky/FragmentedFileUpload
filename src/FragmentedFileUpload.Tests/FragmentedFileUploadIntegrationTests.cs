@@ -89,8 +89,7 @@ namespace FragmentedFileUpload.Tests
                     Directory.CreateDirectory(tempDirectoryPath);
                     foreach (var file in Directory.GetFiles(directory))
                     {
-                        if (file != null)
-                            File.Copy(file, Path.Combine(tempDirectoryPath, Path.GetFileName(file)));
+	                    File.Copy(file, Path.Combine(tempDirectoryPath, Path.GetFileName(file)));
                     }
                 }
             }
